@@ -6,7 +6,7 @@ Agente autônomo inteligente para planejamento de viagens, construído com **Lan
 Acesso ao video no youtube onde eu ensino como implementar o projeto presente neste repositório:
 
 - Seu Chatbot ESQUECE Tudo? Resolvi com Este Método (LangGraph + Memória - PARTE 1) - [Acessar link](https://youtu.be/dZ0jYf5wd4s)
-- Parte 2 -  [Acessar link](https://youtu.be/dZ0jYf5wd4s)
+- Criando o Chatbot com MEMÓRIA INFINITA do Zero (Python + LangGraph + Código Completo) -  [Acessar link](https://youtu.be/49Ncw6hzUHA)
 
 ## 📋 Sobre o Projeto
 
