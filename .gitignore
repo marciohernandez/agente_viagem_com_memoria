@@ -8,10 +8,33 @@ wheels/
 
 # Virtual environments
 .venv
+venv/
+env/
 
 # IDE
 .idea/
+.vscode/
+*.swp
+*.swo
+*~
 
+# Environment files
 .mcp.json
 .env
 .claude
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Qdrant storage
+qdrant_storage/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db

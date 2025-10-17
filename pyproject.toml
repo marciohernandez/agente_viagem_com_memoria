@@ -1,9 +1,18 @@
 [project]
-name = "agente-com-memorias"
+name = "agente-viagem-com-memoria"
 version = "0.1.0"
-description = "Add your description here"
+description = "Agente autônomo inteligente para planejamento de viagens com memória de longo prazo"
 readme = "README.md"
 requires-python = ">=3.13"
+authors = [
+    {name = "Marcio Hernandez", email = "162717576+marciohernandez@users.noreply.github.com"}
+]
+keywords = ["langchain", "langgraph", "openai", "qdrant", "ai-agent", "travel-planner"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.13",
+]
 dependencies = [
     "ddgs>=9.6.0",
     "langchain-community>=0.3.31",
@@ -15,3 +24,26 @@ dependencies = [
     "markdownify>=1.2.0",
     "python-dotenv>=1.1.1",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "black>=24.0.0",
+    "ruff>=0.3.0",
+]
+
+[project.scripts]
+agente-viagem = "main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.black]
+line-length = 100
+target-version = ['py313']

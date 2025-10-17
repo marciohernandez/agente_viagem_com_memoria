@@ -151,31 +151,43 @@ Ou use o Qdrant Cloud: https://cloud.qdrant.io/
 source .venv/bin/activate  # Linux/macOS
 .venv\Scripts\activate     # Windows
 
-# Executar o workflow principal
-python worflow.py
+# Executar o workflow principal (novo ponto de entrada)
+python main.py
+
+# OU usando UV diretamente
+uv run python main.py
 ```
 
 ### Exemplo de Interação
 
 ```python
 from langchain_core.messages import HumanMessage
+from src.agente_viagem.agents import TravelAgent
+from src.agente_viagem.config import Settings
+from src.agente_viagem.utils import print_stream_update
 
-# Configuração da conversa
-configuracao = {
-    "configurable": {
-        "thread_id": "conversa_1",  # ID da thread (persiste conversa)
-        "user_id": "Gustavo"         # ID do usuário (filtra memórias)
+# Inicializa configurações
+settings = Settings()
+settings.validate()
+
+# Cria o agente
+with TravelAgent(settings) as agent:
+    # Configuração da conversa
+    configuracao = {
+        "configurable": {
+            "thread_id": "conversa_1",  # ID da thread (persiste conversa)
+            "user_id": "Gustavo"         # ID do usuário (filtra memórias)
+        }
     }
-}
-
-# Enviar mensagem
-for chunk in workflow.stream(
-    {"messages": [HumanMessage(content="Quero viajar para Londres por 5 dias")]},
-    config=configuracao,
-    subgraphs=True,
-    stream_mode="updates"
-):
-    print_stream_update(chunk)
+    
+    # Enviar mensagem
+    for chunk in agent.workflow.stream(
+        {"messages": [HumanMessage(content="Quero viajar para Londres por 5 dias")]},
+        config=configuracao,
+        subgraphs=True,
+        stream_mode="updates"
+    ):
+        print_stream_update(chunk)
 ```
 
 ### Fluxo de Uso Típico
@@ -188,34 +200,54 @@ for chunk in workflow.stream(
 
 ## 📁 Estrutura do Projeto
 
+O projeto foi reestruturado seguindo as melhores práticas de Python:
+
 ```
-agente_com_memorias/
+agente_viagem_com_memoria/
 │
-├── worflow.py              # Grafo principal e execução
-├── state.py                # Definição dos estados (Place, Trip, AgenteViagemState)
-├── tools.py                # Ferramentas de busca web e criação de trips
-├── memorias.py             # Ferramentas de memória (store/retrieve)
-├── prompt.py               # Prompt do agente (Geodesic Framework)
-├── banco_persistencia.py   # Configuração do SQLite checkpointer
+├── src/                          # Código fonte principal
+│   └── agente_viagem/           # Pacote principal
+│       ├── config/              # Configurações e constantes
+│       ├── models/              # Modelos de dados (Place, Trip, Memory, State)
+│       ├── services/            # Serviços (Database, MemoryService)
+│       ├── tools/               # Ferramentas do agente
+│       ├── agents/              # Agentes e workflows
+│       └── utils/               # Utilitários (formatação, etc)
 │
-├── pyproject.toml          # Configuração do projeto e dependências
-├── uv.lock                 # Lock file de dependências (gerado pelo UV)
-├── .env                    # Variáveis de ambiente (não versionado)
-└── README.md               # Este arquivo
+├── main.py                      # Ponto de entrada principal
+├── pyproject.toml              # Configuração do projeto e dependências
+├── uv.lock                     # Lock file de dependências
+├── .env                        # Variáveis de ambiente (não versionado)
+├── README.md                   # Este arquivo
+└── ESTRUTURA.md                # Documentação detalhada da estrutura
 ```
+
+Para mais detalhes sobre a organização do código, veja [ESTRUTURA.md](ESTRUTURA.md).
 
 ## 🧪 Testando Componentes Individuais
 
-### Testar Memórias
+### Testar a Aplicação Completa
 
 ```bash
-python memorias.py
+python main.py
 ```
 
-### Testar Ferramentas
+### Testar Importações dos Módulos
 
 ```python
-from tools import search, buscar_conteudo_completo_site
+# Testar configurações
+from src.agente_viagem.config import Settings, OPENAI_MODEL
+settings = Settings()
+settings.validate()
+
+# Testar modelos
+from src.agente_viagem.models import Place, Trip, Memory
+
+# Testar serviços
+from src.agente_viagem.services import DatabaseService, MemoryService
+
+# Testar ferramentas
+from src.agente_viagem.tools import search, buscar_conteudo_completo_site
 
 # Buscar na web
 results = search.invoke("pontos turísticos Londres")
@@ -292,3 +324,52 @@ uv run python worflow.py
 ## 📝 Licença
 
 Este é um projeto educacional de código aberto. Sinta-se livre para usar, modificar e aprender com ele!
+
+---
+
+## 🔄 Melhorias Recentes
+
+### Reestruturação com Melhores Práticas (v0.1.0)
+
+O projeto foi completamente reestruturado seguindo as melhores práticas de desenvolvimento Python:
+
+#### ✨ Principais Melhorias:
+
+1. **Estrutura de Pacotes Profissional**
+   - Código organizado em módulos com responsabilidades claras
+   - Separação entre config, models, services, tools, agents e utils
+   - Uso adequado de `__init__.py` para criar pacotes Python
+
+2. **Gerenciamento de Configurações**
+   - Classe `Settings` centraliza todas as configurações
+   - Constantes extraídas para arquivo dedicado
+   - Validação de configurações obrigatórias
+
+3. **Separação de Responsabilidades**
+   - `DatabaseService`: Gerencia persistência SQLite
+   - `MemoryService`: Gerencia memórias no Qdrant
+   - `TravelAgent`: Orquestra o workflow principal
+
+4. **Injeção de Dependências**
+   - Classes recebem dependências via construtor
+   - Facilita testes e manutenção
+   - Maior flexibilidade e reutilização
+
+5. **Context Managers**
+   - Gerenciamento automático de recursos (conexões, etc)
+   - Código mais limpo e seguro
+
+6. **Documentação Aprimorada**
+   - Docstrings detalhadas em todas as classes e métodos
+   - `ESTRUTURA.md` documenta a organização do código
+   - Type hints para melhor IDE support
+
+7. **Ponto de Entrada Claro**
+   - `main.py` como entrada principal da aplicação
+   - Fácil execução e customização
+
+Para mais detalhes, consulte [ESTRUTURA.md](ESTRUTURA.md).
+
+### Arquivos Legados
+
+Os arquivos antigos na raiz (`worflow.py`, `state.py`, `tools.py`, etc.) foram mantidos para referência, mas o código novo está em `src/agente_viagem/`. Eles podem ser removidos após validação completa.
