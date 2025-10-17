@@ -1,6 +1,6 @@
 """Ferramentas para gerenciamento de memórias de longo prazo."""
 
-from typing import Annotated, List, Literal
+from typing import Annotated, List, Literal, Optional
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
@@ -9,8 +9,16 @@ from ..services.memory_service import MemoryService
 from ..config.constants import MAX_MEMORY_RETRIEVAL_LIMIT
 
 
-# Instância global do serviço de memórias
-_memory_service = MemoryService()
+# Instância global do serviço de memórias (lazy-loaded)
+_memory_service: Optional[MemoryService] = None
+
+
+def _get_memory_service() -> MemoryService:
+    """Retorna a instância do serviço de memórias, criando-a se necessário."""
+    global _memory_service
+    if _memory_service is None:
+        _memory_service = MemoryService()
+    return _memory_service
 
 
 @tool
@@ -40,7 +48,7 @@ def store_memory_tool(
     user_id = configurable.get("user_id")
     thread_id = configurable.get("thread_id")
     
-    return _memory_service.store_memories(
+    return _get_memory_service().store_memories(
         memories=memories,
         user_id=user_id,
         thread_id=thread_id
@@ -85,7 +93,7 @@ def retrieve_memories_tool(
     configurable = config.get("configurable", {})
     user_id = configurable.get("user_id")
     
-    return _memory_service.retrieve_memories(
+    return _get_memory_service().retrieve_memories(
         query=query,
         memory_type=memory_type,
         limit=limit,
